@@ -117,7 +117,7 @@ export const config = {
         { keywords: ['chapitre', 'chapter', 'update'], emoji: '📖' },
         { keywords: ['hype', 'hyped', 'excited', 'trop bien'], emoji: '🔥' },
         { keywords: ['kawaii', 'cute', 'mignon', 'adorable'], emoji: '✨' },
-        { keywords: ['rip', 'f', 'sad', 'triste'], emoji: '😢' },
+        { keywords: ['rip', 'sad', 'triste'], emoji: '😢' },
         { keywords: ['gg', 'bravo', 'bien joué', 'nice'], emoji: '🎉' },
         { keywords: ['café', 'coffee', 'tired', 'fatigué'], emoji: '☕' },
         { keywords: ['peur', 'scary', 'horror', 'creepy'], emoji: '👻' },
