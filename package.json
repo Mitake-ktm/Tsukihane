@@ -1,6 +1,6 @@
 {
   "name": "tsukihane-bot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Multifunctional Discord bot with moderation, leveling, and automation",
   "main": "dist/index.js",
   "scripts": {
