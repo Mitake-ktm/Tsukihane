@@ -37,7 +37,11 @@ async function handleKeywordReactions(message: Message): Promise<void> {
     const lowerContent = message.content.toLowerCase();
 
     for (const { keywords, emoji } of config.keywordReactions) {
-        if (keywords.some(keyword => lowerContent.includes(keyword))) {
+        // Create regex for whole word matching
+        // We use word boundaries \b to ensure we match "keyword" but not "keywordss" or "akeyword"
+        const regexes = keywords.map(k => new RegExp(`\\b${k}\\b`, 'i'));
+
+        if (regexes.some(regex => regex.test(lowerContent))) {
             await message.react(emoji).catch(() => { });
             break;
         }
