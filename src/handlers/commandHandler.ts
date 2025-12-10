@@ -29,7 +29,11 @@ export async function loadCommands(client: Client & { commands: Collection<strin
         const stat = fs.statSync(folderPath);
 
         if (stat.isDirectory()) {
-            const commandFiles = fs.readdirSync(folderPath).filter(file => file.endsWith('.ts') || file.endsWith('.js'));
+            const commandFiles = fs.readdirSync(folderPath).filter(file =>
+                (file.endsWith('.ts') || file.endsWith('.js')) &&
+                !file.endsWith('.d.ts') &&
+                !file.endsWith('.map')
+            );
 
             for (const file of commandFiles) {
                 const filePath = path.join(folderPath, file);
@@ -59,7 +63,11 @@ export async function deployCommands(): Promise<void> {
         const stat = fs.statSync(folderPath);
 
         if (stat.isDirectory()) {
-            const commandFiles = fs.readdirSync(folderPath).filter(file => file.endsWith('.ts') || file.endsWith('.js'));
+            const commandFiles = fs.readdirSync(folderPath).filter(file =>
+                (file.endsWith('.ts') || file.endsWith('.js')) &&
+                !file.endsWith('.d.ts') &&
+                !file.endsWith('.map')
+            );
 
             for (const file of commandFiles) {
                 const filePath = path.join(folderPath, file);
