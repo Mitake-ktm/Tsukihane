@@ -7,7 +7,7 @@ import { fetchUserGuilds, filterManageableGuilds } from '@/lib/discord';
 // For now, we'll check if the bot is in the guild by querying Discord API
 async function getBotGuilds(): Promise<string[]> {
     try {
-        const response = await fetch('https://discord.com/api/v10/users/@me/guilds', {
+        const response = await fetch('https://discord.com/api/v10/users/@me/guilds?limit=200', {
             headers: {
                 Authorization: `Bot ${process.env.BOT_TOKEN}`,
             },
@@ -19,6 +19,7 @@ async function getBotGuilds(): Promise<string[]> {
         }
 
         const guilds = await response.json();
+        console.log(`[API] Fetched ${guilds.length} guilds for bot`);
         return guilds.map((g: { id: string }) => g.id);
     } catch (error) {
         console.error('Error fetching bot guilds:', error);
