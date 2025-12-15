@@ -11,9 +11,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Tsukihane Dashboard",
   description: "Admin dashboard for the Tsukihane Discord bot",
-  icons: {
-    icon: "/favicon.ico",
-  },
+
 };
 
 export default function RootLayout({

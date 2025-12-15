@@ -3,6 +3,7 @@
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import Logo from '@/components/Logo';
 
 export default function LoginPage() {
     const { status } = useSession();
@@ -18,7 +19,7 @@ export default function LoginPage() {
         return (
             <div className="login-container">
                 <div className="login-card">
-                    <div className="login-logo">🌙</div>
+                    <div className="login-logo"><Logo /></div>
                     <p className="text-muted">Loading...</p>
                 </div>
             </div>
@@ -28,7 +29,7 @@ export default function LoginPage() {
     return (
         <div className="login-container">
             <div className="login-card slide-up">
-                <div className="login-logo">🌙</div>
+                <div className="login-logo"><Logo /></div>
                 <h1 className="login-title">Tsukihane Dashboard</h1>
                 <p className="login-subtitle">
                     Sign in with your Discord account to manage your server

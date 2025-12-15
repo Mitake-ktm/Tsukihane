@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Guild } from '@/lib/types';
 import { getGuildIconUrl, getGuildInitials } from '@/lib/discord';
+import Logo from '@/components/Logo';
 
 interface SidebarProps {
     guild: Guild;
@@ -130,7 +131,7 @@ export default function Sidebar({ guild }: SidebarProps) {
         <aside className="sidebar">
             <div className="sidebar-header">
                 <div className="sidebar-logo">
-                    <span>🌙</span>
+                    <Logo />
                     <span>Tsukihane</span>
                 </div>
             </div>

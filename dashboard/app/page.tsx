@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Guild } from '@/lib/types';
 import { getGuildIconUrl, getGuildInitials } from '@/lib/discord';
+import Logo from '@/components/Logo';
 
 export default function HomePage() {
   const { data: session, status } = useSession();
@@ -48,7 +49,7 @@ export default function HomePage() {
     return (
       <div className="login-container">
         <div className="login-card">
-          <div className="login-logo">🌙</div>
+          <div className="login-logo"><Logo /></div>
           <p className="text-muted">Loading your servers...</p>
         </div>
       </div>
@@ -79,7 +80,7 @@ export default function HomePage() {
             marginBottom: '1rem',
             filter: 'drop-shadow(0 0 20px rgba(88, 101, 242, 0.5))'
           }}>
-            🌙
+            <Logo />
           </div>
           <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Tsukihane Dashboard</h1>
           <p className="text-muted">Select a server to manage</p>
