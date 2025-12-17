@@ -39,7 +39,7 @@ const messageDelete: BotEvent = {
 
         await logEvent(message.guild.id, 'MESSAGE_DELETE', `**Message supprimé** dans <#${message.channel.id}>\n\n**Contenu** :\n${content}`, config.colors.error, {
             target: user as User || undefined,
-            executor: executor || undefined,
+            executor: (executor as User) || undefined,
             extra: {
                 channel: (message.channel as TextChannel).name,
                 messageId: message.id

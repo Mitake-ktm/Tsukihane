@@ -1,4 +1,4 @@
-import { GuildBan, Guild, AuditLogEvent } from 'discord.js';
+import { GuildBan, Guild, AuditLogEvent, User } from 'discord.js';
 import { BotEvent } from '../../types';
 import { logEvent } from '../../services/loggingService';
 import { config } from '../../config/config';
@@ -22,7 +22,7 @@ const guildBanAdd: BotEvent = {
 
         await logEvent(ban.guild.id, 'MEMBER_BAN', `**Membre banni** : ${ban.user.tag}`, config.colors.error, {
             target: ban.user,
-            executor: executor || undefined,
+            executor: (executor as User) || undefined,
             reason: ban.reason || 'Aucune raison fournie'
         });
     }
@@ -46,7 +46,7 @@ const guildBanRemove: BotEvent = {
 
         await logEvent(ban.guild.id, 'MEMBER_UNBAN', `**Bannissement révoqué** : ${ban.user.tag}`, config.colors.success, {
             target: ban.user,
-            executor: executor || undefined
+            executor: (executor as User) || undefined
         });
     }
 };
