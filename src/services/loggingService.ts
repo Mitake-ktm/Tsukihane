@@ -25,6 +25,7 @@ interface LogOptions {
     target?: User | { id: string; tag?: string };
     reason?: string;
     extra?: any;
+    customEmbed?: EmbedBuilder;
 }
 
 export async function logEvent(
@@ -55,11 +56,20 @@ export async function logEvent(
         const channel = await guild.channels.fetch(config.channels.serverLogs) as TextChannel;
 
         if (channel) {
-            const embed = new EmbedBuilder()
-                .setTitle(`📝 Log: ${type.replace(/_/g, ' ')}`)
-                .setDescription(description)
-                .setColor(color)
-                .setTimestamp();
+            let embed: EmbedBuilder;
+
+            if (options.customEmbed) {
+                embed = options.customEmbed;
+                // Ensure basics like timestamp/color are set if not provided, though typically the caller handles styling
+                if (!embed.data.timestamp) embed.setTimestamp();
+                if (!embed.data.color) embed.setColor(color);
+            } else {
+                embed = new EmbedBuilder()
+                    .setTitle(`📝 Log: ${type.replace(/_/g, ' ')}`)
+                    .setDescription(description)
+                    .setColor(color)
+                    .setTimestamp();
+            }
 
             if (options.executor) {
                 embed.addFields({ name: 'Exécuté par', value: `${options.executor} (\`${options.executor.id}\`)`, inline: true });

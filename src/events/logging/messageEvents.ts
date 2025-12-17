@@ -1,4 +1,4 @@
-import { Message, PartialMessage, AuditLogEvent, TextChannel, User } from 'discord.js';
+import { Message, PartialMessage, AuditLogEvent, TextChannel, User, EmbedBuilder } from 'discord.js';
 import { BotEvent } from '../../types';
 import { logEvent } from '../../services/loggingService';
 import { config } from '../../config/config';
@@ -49,22 +49,56 @@ const messageDelete: BotEvent = {
 
         const content = message.content ? (message.content.length > 1000 ? message.content.substring(0, 1000) + '...' : message.content) : '*Pas de contenu (image/embed)*';
 
-        // Custom description based on executor
-        let description = `**Message supprimé** dans <#${message.channel.id}>\n\n**Contenu** :\n${content}`;
+        // Custom Embed Construction for "Message Deleted"
+        const embed = new EmbedBuilder()
+            .setTitle('🗑️ Message Deleted')
+            .setDescription(content)
+            .setColor(config.colors.error)
+            .setTimestamp();
 
-        if (executor) {
-            if (executor.id === message.author?.id) {
-                description += `\n\n**Supprimé par l'auteur** (${executor})`;
-            } else {
-                description += `\n\n**Supprimé par** : ${executor} (\`${executor.id}\`)`;
-            }
+        // 1. Author field (Author Name + Avatar in Author slot)
+        if (user && 'username' in user) {
+            embed.setAuthor({ name: user.tag, iconURL: user.displayAvatarURL() });
         } else {
-            description += `\n\n**Supprimé par** : *Inconnu (possiblement l'auteur ou auto-delete)*`;
+            embed.setAuthor({ name: 'Utilisateur Inconnu' });
         }
 
-        await logEvent(message.guild.id, 'MESSAGE_DELETE', description, config.colors.error, {
+        // 2. Message Date
+        // Format: 17 décembre 2025 13:30 (il y a une minute)
+        // Use discord.js time formatting
+        const createdTimestamp = Math.floor(message.createdTimestamp / 1000);
+        embed.addFields({
+            name: 'Message Date',
+            value: `<t:${createdTimestamp}:f> (<t:${createdTimestamp}:R>)`,
+            inline: false
+        });
+
+        // 3. IDs field
+        // Message (ID)
+        // # logs (ID)
+        // @ User (ID)
+        // Using blockquote syntax like in the image
+        let idField = `> Message (${message.id})\n`;
+        idField += `> ${message.channel} (${message.channel.id})\n`;
+        if (user && 'id' in user) {
+            idField += `> ${user} (${user.id})`;
+        } else {
+            idField += `> Utilisteur Inconnu`;
+        }
+
+        embed.addFields({ name: 'IDs', value: idField, inline: false });
+
+        // Add Footer for executor info if known
+        if (executor) {
+            embed.setFooter({ text: `Supprimé par ${executor.tag}`, iconURL: executor.displayAvatarURL() });
+        } else {
+            embed.setFooter({ text: `Supprimé par inconnu ou auto-delete` });
+        }
+
+        await logEvent(message.guild.id, 'MESSAGE_DELETE', `Message de ${user} supprimé`, config.colors.error, {
             target: user as User || undefined,
             executor: (executor as User) || undefined,
+            customEmbed: embed,
             extra: {
                 channel: (message.channel as TextChannel).name,
                 messageId: message.id
