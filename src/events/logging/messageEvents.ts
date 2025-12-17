@@ -7,24 +7,36 @@ const messageDelete: BotEvent = {
     name: 'messageDelete',
     once: false,
     async execute(message: Message | PartialMessage) {
-        if (!message.guild || message.author?.bot) return;
+        if (!message.guild) return; // Keep bot allowed, remove message.author.bot check
 
-        // Fetch audit logs to find executor (optional, might be unreliable for old messages)
+        // Fetch audit logs to find executor
         let executor = null;
         try {
             const fetchedLogs = await message.guild.fetchAuditLogs({
-                limit: 1,
+                limit: 5, // Fetch a few more just in case
                 type: AuditLogEvent.MessageDelete,
             });
-            const deletionLog = fetchedLogs.entries.first();
 
-            // Allow 5 seconds margin
-            if (deletionLog && (Date.now() - deletionLog.createdTimestamp) < 5000 && deletionLog.target?.id === message.author?.id) {
+            // Find a log entry that matches: target is message author, and created recently
+            const deletionLog = fetchedLogs.entries.find(entry =>
+                entry.target?.id === message.author?.id &&
+                entry.extra.channel.id === message.channel.id &&
+                (Date.now() - entry.createdTimestamp) < 20000 // 20 seconds margin
+            );
+
+            if (deletionLog) {
                 executor = deletionLog.executor;
+            } else {
+                // If no audit log found:
+                // 1. If it's a user message, they likely deleted it themselves
+                // 2. If it's a bot message, it might be an auto-delete or API action (unknown executor)
+                if (message.author && !message.author.bot) {
+                    executor = message.author;
+                }
             }
         } catch (e) { }
 
-        if (message.webhookId) return; // Ignore webhooks
+        if (message.webhookId) return; // Still ignore webhooks
 
         let user = message.author;
         if (user && 'partial' in user && user.partial) {
@@ -37,7 +49,20 @@ const messageDelete: BotEvent = {
 
         const content = message.content ? (message.content.length > 1000 ? message.content.substring(0, 1000) + '...' : message.content) : '*Pas de contenu (image/embed)*';
 
-        await logEvent(message.guild.id, 'MESSAGE_DELETE', `**Message supprimé** dans <#${message.channel.id}>\n\n**Contenu** :\n${content}`, config.colors.error, {
+        // Custom description based on executor
+        let description = `**Message supprimé** dans <#${message.channel.id}>\n\n**Contenu** :\n${content}`;
+
+        if (executor) {
+            if (executor.id === message.author?.id) {
+                description += `\n\n**Supprimé par l'auteur** (${executor})`;
+            } else {
+                description += `\n\n**Supprimé par** : ${executor} (\`${executor.id}\`)`;
+            }
+        } else {
+            description += `\n\n**Supprimé par** : *Inconnu (possiblement l'auteur ou auto-delete)*`;
+        }
+
+        await logEvent(message.guild.id, 'MESSAGE_DELETE', description, config.colors.error, {
             target: user as User || undefined,
             executor: (executor as User) || undefined,
             extra: {
