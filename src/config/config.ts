@@ -13,6 +13,7 @@ export const config = {
     // Channel IDs (to be configured)
     channels: {
         moderationLogs: '1276872203283206180',
+        serverLogs: '1276872203283206180', // Using same channel as mod logs for now as requested "Single channel"
         announcements: '1438975899612741894',
         welcome: '1276872203555704921',
         levelUp: '1276872203685859475',
