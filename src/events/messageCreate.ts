@@ -1,10 +1,12 @@
-import { Events, Message, TextChannel } from 'discord.js';
+import { Events, Message, TextChannel, Collection } from 'discord.js';
 import { handleAutoModeration } from '../services/moderationService';
 import { processMessage, handleLevelUp } from '../services/xpService';
 import { config } from '../config/config';
 
 export const name = Events.MessageCreate;
 export const once = false;
+
+const lastMikeTrigger = new Collection<string, number>();
 
 export async function execute(message: Message): Promise<void> {
     // Ignore bots
@@ -52,7 +54,17 @@ async function handleSpecialMentions(message: Message): Promise<void> {
     const { mike } = config.specialMentions;
 
     if (mike.enabled && message.content.toLowerCase().includes('mike')) {
+        const now = Date.now();
+        const cooldownAmount = 24 * 60 * 60 * 1000; // 24 hours
+        const lastTrigger = lastMikeTrigger.get(message.author.id);
+
+        if (lastTrigger && now - lastTrigger < cooldownAmount) {
+            return;
+        }
+
         const response = mike.responses[Math.floor(Math.random() * mike.responses.length)];
         await message.reply(response).catch(() => { });
+
+        lastMikeTrigger.set(message.author.id, now);
     }
 }
