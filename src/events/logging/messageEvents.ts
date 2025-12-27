@@ -129,4 +129,42 @@ const messageUpdate: BotEvent = {
     }
 };
 
-export const messageEvents = [messageDelete, messageUpdate];
+const messageBulkDelete: BotEvent = {
+    name: 'messageDeleteBulk',
+    once: false,
+    async execute(messages: Map<string, Message | PartialMessage>, channel: TextChannel) {
+        if (!channel.guild) return;
+
+        const count = messages.size;
+        const sampleMessages = Array.from(messages.values()).slice(0, 5);
+        const authors = [...new Set(sampleMessages.map(m => m.author?.tag || 'Inconnu').filter(Boolean))];
+
+        const embed = new EmbedBuilder()
+            .setTitle('🗑️ Suppression en Masse')
+            .setDescription(`**${count}** messages supprimés dans <#${channel.id}>`)
+            .setColor(config.colors.error)
+            .setTimestamp();
+
+        embed.addFields(
+            { name: 'Canal', value: `${channel.name} (\`${channel.id}\`)`, inline: true },
+            { name: 'Nombre', value: `${count} messages`, inline: true }
+        );
+
+        if (authors.length > 0) {
+            embed.addFields({ name: 'Auteurs (échantillon)', value: authors.join(', '), inline: false });
+        }
+
+        await logEvent(channel.guild.id, 'MESSAGE_BULK_DELETE', `${count} messages supprimés dans #${channel.name}`, config.colors.error, {
+            channelId: channel.id,
+            channelName: channel.name,
+            customEmbed: embed,
+            extra: {
+                count,
+                channel: channel.name,
+                sampleAuthors: authors
+            }
+        });
+    }
+};
+
+export const messageEvents = [messageDelete, messageUpdate, messageBulkDelete];

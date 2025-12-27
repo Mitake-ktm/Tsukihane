@@ -118,3 +118,60 @@ const BlacklistSchema = new Schema({
 BlacklistSchema.index({ guildId: 1, word: 1 }, { unique: true });
 
 export const Blacklist: Model<IBlacklist> = mongoose.models.Blacklist || mongoose.model('Blacklist', BlacklistSchema);
+
+// --- ServerLog for comprehensive event logging ---
+
+export type ServerLogType =
+    | 'MESSAGE_DELETE' | 'MESSAGE_UPDATE' | 'MESSAGE_BULK_DELETE' | 'MESSAGE_PIN' | 'MESSAGE_UNPIN'
+    | 'CHANNEL_CREATE' | 'CHANNEL_DELETE' | 'CHANNEL_UPDATE' | 'CHANNEL_PINS_UPDATE'
+    | 'ROLE_CREATE' | 'ROLE_DELETE' | 'ROLE_UPDATE'
+    | 'MEMBER_JOIN' | 'MEMBER_LEAVE' | 'MEMBER_UPDATE' | 'MEMBER_BAN' | 'MEMBER_UNBAN' | 'MEMBER_KICK' | 'MEMBER_TIMEOUT'
+    | 'VOICE_JOIN' | 'VOICE_LEAVE' | 'VOICE_MOVE' | 'VOICE_MUTE' | 'VOICE_DEAFEN'
+    | 'GUILD_UPDATE' | 'INVITE_CREATE' | 'INVITE_DELETE' | 'INVITE_UPDATE'
+    | 'EMOJI_CREATE' | 'EMOJI_DELETE' | 'EMOJI_UPDATE'
+    | 'STICKER_CREATE' | 'STICKER_DELETE' | 'STICKER_UPDATE'
+    | 'THREAD_CREATE' | 'THREAD_DELETE' | 'THREAD_UPDATE'
+    | 'MODERATION_ACTION' | 'AUTOMOD_ACTION';
+
+export type LogSeverity = 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
+export type LogCategory = 'MESSAGE' | 'CHANNEL' | 'ROLE' | 'MEMBER' | 'VOICE' | 'GUILD' | 'EMOJI' | 'THREAD' | 'MODERATION' | 'OTHER';
+
+export interface IServerLog extends Document {
+    guildId: string;
+    type: ServerLogType;
+    category: LogCategory;
+    severity: LogSeverity;
+    executorId?: string;
+    executorTag?: string;
+    targetId?: string;
+    targetTag?: string;
+    channelId?: string;
+    channelName?: string;
+    description: string;
+    details: Record<string, unknown>;
+    createdAt: Date;
+}
+
+const ServerLogSchema = new Schema({
+    guildId: { type: String, required: true, index: true },
+    type: { type: String, required: true, index: true },
+    category: { type: String, required: true, index: true },
+    severity: { type: String, default: 'INFO', index: true },
+    executorId: { type: String, index: true },
+    executorTag: { type: String },
+    targetId: { type: String, index: true },
+    targetTag: { type: String },
+    channelId: { type: String, index: true },
+    channelName: { type: String },
+    description: { type: String, required: true },
+    details: { type: Schema.Types.Mixed, default: {} },
+}, {
+    timestamps: { createdAt: true, updatedAt: false }
+});
+
+ServerLogSchema.index({ guildId: 1, createdAt: -1 });
+ServerLogSchema.index({ guildId: 1, type: 1, createdAt: -1 });
+ServerLogSchema.index({ guildId: 1, category: 1, createdAt: -1 });
+
+export const ServerLog: Model<IServerLog> = mongoose.models.ServerLog || mongoose.model('ServerLog', ServerLogSchema);
+
