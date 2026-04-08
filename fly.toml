@@ -1,0 +1,34 @@
+app = "tsukihane"
+primary_region = "cdg"
+
+[build]
+
+# Désactive le scale to zero — le bot reste toujours actif
+[machines]
+  [machines.defaults]
+    size = "shared-cpu-1x"
+
+[[services]]
+  internal_port = 3000
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  # Health check pour garder la machine vivante
+  [[services.http_checks]]
+    interval = "15s"
+    timeout = "5s"
+    grace_period = "30s"
+    method = "GET"
+    path = "/"
+    protocol = "http"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "3000"
